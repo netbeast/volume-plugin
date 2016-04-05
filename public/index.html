@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Web microphone</title>
+</head>
+<body>
+
+  <script src='mqtt.js'></script>
+  <script>
+
+    window.AudioContext = window.AudioContext || window.webkitAudioContext
+    navigator.GetUserMedia = navigator.GetUserMedia || navigator.webkitGetUserMedia
+
+    var context = new AudioContext()
+
+    navigator.GetUserMedia({audio: true}, function(stream) {
+      var microphone = context.createMediaStreamSource(stream)
+
+         // setup a analyzer
+         analyser = context.createAnalyser()
+         analyser.smoothingTimeConstant = 0.3
+         analyser.fftSize = 1024
+
+         javascriptNode = context.createScriptProcessor(2048, 1, 1)
+
+    // microphone -> filter -> destination.
+    microphone.connect(analyser)
+    analyser.connect(javascriptNode)
+    javascriptNode.connect(context.destination)
+    // microphone.connect(context.destination)
+
+    javascriptNode.onaudioprocess = function() {
+
+        // get the average, bincount is fftsize / 2
+        var array =  new Uint8Array(analyser.frequencyBinCount)
+        analyser.getByteFrequencyData(array)
+        var average = getAverageVolume(array)
+
+        if (average > 50) {
+          console.log('VOLUME:' + average)
+        }
+      }
+
+    }, function (e) { console.trace(e) })
+
+    function getAverageVolume(array) {
+      var values = 0
+      var average
+
+      var length = array.length
+
+      // get all the frequency amplitudes
+      for (var i = 0; i < length; i++) {
+        values += array[i]
+      }
+
+      average = values / length
+      return average
+    }
+
+  </script>
+</body>
+</html>

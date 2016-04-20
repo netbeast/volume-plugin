@@ -8,6 +8,14 @@
   <script src='mqtt.js'></script>
   <script>
 
+    var client = mqtt.connect()
+    var average  = 0 // stores average volume
+
+    setInterval(function(){
+      console.log('send volume', average)
+      client.publish('netbeast/volume', JSON.stringify({ volume: average }))
+    }, 3000)
+
     window.AudioContext = window.AudioContext || window.webkitAudioContext
     navigator.GetUserMedia = navigator.GetUserMedia || navigator.webkitGetUserMedia
 
@@ -38,6 +46,7 @@
 
         if (average > 50) {
           console.log('VOLUME:' + average)
+          client.publish('netbeast/volume', JSON.stringify({ volume: average }))
         }
       }
 

@@ -1,5 +1,5 @@
 {
-  "name": "microphone",
+  "name": "volume-plugin",
   "version": "0.0.1",
   "description": "A microphone that records ambient noise",
   "main": "index.js",
